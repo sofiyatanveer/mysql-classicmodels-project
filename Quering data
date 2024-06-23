@@ -1,0 +1,157 @@
+
+-- 1. find products whose buy prices between 90 and 100:
+SELECT 
+    productCode, 
+    productName, 
+    buyPrice
+FROM
+    products
+WHERE
+    buyPrice BETWEEN 90 AND 100;
+
+--2. Find unique combination of city and state from the customers.
+
+SELECT DISTINCT
+    state, city
+FROM
+    customers
+WHERE
+    state IS NOT NULL
+ORDER BY 
+    state, 
+    city;
+
+--3.  find the offices that are not located in France and the USA
+SELECT 
+    officeCode, 
+    city, 
+    phone
+FROM
+    offices
+WHERE
+    country NOT IN ('USA' , 'France')
+ORDER BY 
+    city;
+
+--4. Find the top five customers who have the highest credit
+SELECT 
+    customerNumber, 
+    customerName, 
+    creditLimit
+FROM
+    customers
+ORDER BY creditLimit DESC
+LIMIT 5;
+
+--5.find customers without any orders
+SELECT 
+    c.customerNumber, 
+    c.customerName, 
+    o.orderNumber, 
+    o.status
+FROM
+    customers c
+LEFT JOIN orders o 
+    ON c.customerNumber = o.customerNumber
+WHERE
+    orderNumber IS NULL;
+
+--6. Find order numbers, the number of items sold per order, and total sales of order whose total sales greater than 1000  and contain more than 600 items
+SELECT 
+  ordernumber, 
+  SUM(quantityOrdered) AS itemsCount, 
+  SUM(priceeach * quantityOrdered) AS total 
+FROM 
+  orderdetails 
+GROUP BY 
+  ordernumber
+HAVING 
+  total > 1000;
+
+--7.  find all orders that already shipped and have a total amount greater than 1500
+SELECT 
+    a.ordernumber, 
+    status, 
+    SUM(priceeach*quantityOrdered) total
+FROM
+    orderdetails a
+INNER JOIN orders b 
+    ON b.ordernumber = a.ordernumber
+GROUP BY  
+    ordernumber, 
+    status
+HAVING 
+    status = 'Shipped' AND 
+    total > 1500;
+
+--8.Find the customers who placed more than four orders
+SELECT 
+  customerName, 
+  COUNT(*) order_count 
+FROM 
+  orders 
+  INNER JOIN customers using (customerNumber) 
+GROUP BY 
+  customerName 
+HAVING 
+  COUNT(*) > 4 
+ORDER BY 
+  order_count;
+
+--subquery
+--9.the customer who has the highest payment
+SELECT 
+    customerNumber, 
+    checkNumber, 
+    amount
+FROM
+    payments
+WHERE
+    amount = (SELECT MAX(amount) FROM payments);
+
+--10.find the customers who have not placed any orders 
+SELECT 
+    customerName
+FROM
+    customers
+WHERE
+    customerNumber NOT IN (SELECT DISTINCT
+            customerNumber
+        FROM
+            orders);
+
+--11.finds the maximum, minimum, and average number of items,remove decimal places from average.
+SELECT 
+    MAX(items), 
+    MIN(items), 
+    FLOOR(AVG(items))
+FROM
+    (SELECT 
+        orderNumber, COUNT(orderNumber) AS items
+    FROM
+        orderdetails
+    GROUP BY orderNumber) AS lineitems;
+
+--12.finds sales orders whose total values are greater than 60K.
+SELECT 
+    orderNumber, 
+    SUM(priceEach * quantityOrdered) total
+FROM
+    orderdetails
+        INNER JOIN
+    orders USING (orderNumber)
+GROUP BY orderNumber
+HAVING SUM(priceEach * quantityOrdered) > 60000;
+
++----------------+--------------------------+
+| customerNumber | customerName             |
++----------------+--------------------------+
+|            148 | Dragon Souveniers, Ltd.  |
+|            259 | Toms Spezialit├ñten, Ltd |
+|            298 | Vida Sport, Ltd          |
++----------------+--------------------------+
+3 rows in set (0.01 sec)
+
+
+--13.
+
